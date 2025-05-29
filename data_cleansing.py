@@ -6,32 +6,32 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """
     Clean the input DataFrame with several data cleaning operations:
     
-    1. Column name cleaning:
+    Column name cleaning:
        - Strip whitespace.
        - Remove duplicate columns.
        - Replace special characters with underscores.
        
-    2. Cell value cleaning for object columns:
+    Cell value cleaning for object columns:
        - Trim whitespace and replace multiple spaces with a single space.
        - Replace values like "null", "unknown", and "error" (case-insensitive) with pd.NA.
        
-    3. Data type conversions:
+    Data type conversions:
        - Attempt to convert object columns to datetime if at least 80% of non-null entries can be parsed as dates.
        - Attempt to convert object columns to numeric where applicable.
        
-    4. Data cleanup:
+    Data cleanup:
        - Drop columns that are completely empty.
        - Remove duplicate rows.
        - Drop rows containing any missing values.
     """
-    # 1. Clean column names
+    # Clean column names
     df.columns = df.columns.str.strip()
     # Remove duplicate columns, if any
     df = df.loc[:, ~df.columns.duplicated()]
     # Replace special characters with underscores (only allow letters, numbers, and underscores)
     df.columns = df.columns.str.replace(r'[^A-Za-z0-9_]+', '_', regex=True)
     
-    # 2. Clean cell values in object columns
+    # Clean cell values in object columns
     def clean_cell(cell):
         if isinstance(cell, str):
             # Trim whitespace and replace multiple spaces with a single space
@@ -44,7 +44,7 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     
     df = df.applymap(clean_cell)
     
-    # 3. Data type conversions
+    # Data type conversions
     # Attempt to convert object columns to datetime if most of the data can be parsed as dates
     for col in df.select_dtypes(include=['object']).columns:
         converted = pd.to_datetime(df[col], errors='coerce', infer_datetime_format=True)
@@ -57,7 +57,7 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     for col in df.select_dtypes(include=['object']).columns:
         df[col] = pd.to_numeric(df[col], errors='ignore')
     
-    # 4. Data cleanup
+    # Data cleanup
     # Remove completely empty columns
     df.dropna(axis=1, how='all', inplace=True)
     # Remove duplicate rows
@@ -82,7 +82,6 @@ st.markdown(
     """
 )
 
-# Allow multiple files and support CSV, XLSX, and XLS file types.
 uploaded_files = st.file_uploader(
     "Upload your CSV/Excel files",
     type=["csv", "xlsx", "xls"],
